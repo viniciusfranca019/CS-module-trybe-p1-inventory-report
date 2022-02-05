@@ -1,23 +1,27 @@
-from inventory_report.reports.simple_report import SimpleReport
 from inventory_report.reports.complete_report import CompleteReport
-from inventory_report.importer.csv_importer import CsvImporter
-from inventory_report.importer.json_importer import JsonImporter
-from inventory_report.importer.xml_importer import XmlImporter
+from inventory_report.reports.simple_report import SimpleReport
+import pandas as pd
 
 
-class Inventory:
-    @classmethod
-    def import_data(cls, path, type):
-        if path.endswith('csv'):
-            products = CsvImporter.import_data(path)
+class Inventory():
 
-        elif path.endswith('xml'):
-            products = XmlImporter.import_data(path)
+    @staticmethod
+    def import_data(path, report_type):
+        splited_path = path.split('.')
+        exten = splited_path[len(splited_path) - 1]
+        if exten == "csv":
+            df = pd.read_csv(path)
 
-        else:
-            products = JsonImporter.import_data(path)
+        if exten == "xml":
+            df = pd.read_xml(path)
+            print(df)
 
-        if type == 'simples':
-            return SimpleReport.generate(products)
-        elif type == 'completo':
-            return CompleteReport.generate(products)
+        if exten == "json":
+            df = pd.read_json(path)
+
+        if report_type == "simples":
+            report = SimpleReport.generate(df)
+            return report
+
+        report = CompleteReport.generate(df)
+        return report

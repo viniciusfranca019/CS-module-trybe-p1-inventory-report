@@ -1,20 +1,19 @@
-import xml.etree.ElementTree as ET
-# https://raccoon.ninja/pt/dev-pt/manipulando-xml-com-python/
-# https://docs.python.org/3/library/xml.etree.elementtree.html
 from inventory_report.importer.importer import Importer
+import pandas as pd
+# vinicius grade
 
 
 class XmlImporter(Importer):
+    @staticmethod
     def import_data(path):
-        if not path.endswith('xml'):
+        splited_path = path.split('.')
+        exten = splited_path[len(splited_path) - 1]
+        if exten != 'xml':
             raise ValueError('Arquivo inválido')
-        result = []
-        tree = ET.parse(path)
-        root = tree.getroot()
-        for record in root.findall('record'):
-            lines = {}
-            for product in record:
-                lines[product.tag] = product.text
-            result.append(lines)
-        print(result)
-        return result
+        df = pd.read_xml(path)
+        s = list(df.T.to_dict().items())
+        to_return = []
+        for dir in s:
+            dir[1]['id'] = str(dir[1]['id'])
+            to_return.append(dir[1])
+        return to_return

@@ -1,10 +1,18 @@
-import json
 from inventory_report.importer.importer import Importer
+import pandas as pd
 
 
 class JsonImporter(Importer):
+    @staticmethod
     def import_data(path):
-        if not path.endswith('json'):
+        splited_path = path.split('.')
+        exten = splited_path[len(splited_path) - 1]
+        if exten != 'json':
             raise ValueError('Arquivo inválido')
-        with open(path, "r") as file:
-            return json.load(file)  #
+        df = pd.read_json(path)
+        s = list(df.T.to_dict().items())
+        to_return = []
+        for dir in s:
+            dir[1]['id'] = str(dir[1]['id'])
+            to_return.append(dir[1])
+        return to_return

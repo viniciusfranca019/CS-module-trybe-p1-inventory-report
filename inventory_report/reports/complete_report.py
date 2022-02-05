@@ -1,23 +1,19 @@
-from collections import Counter
-# https://www.guru99.com/python-counter-collections-example.html
-
+import pandas as pd
 from inventory_report.reports.simple_report import SimpleReport
 
 
 class CompleteReport(SimpleReport):
-    @classmethod
-    def generate(cls, data):
-        initial_report = SimpleReport.generate(data)
 
-        companies_count = Counter(name["nome_da_empresa"] for name in data)
+    @staticmethod
+    def generate(products):
+        df = pd.DataFrame(products)
+        simple_report = SimpleReport.generate(products)
+        complete_report = f"""{simple_report}
+Produtos estocados por empresa: \n"""
+        company_names = df['nome_da_empresa'].value_counts(sort=False)
+        companies_tuples = company_names.iteritems()
 
-        count = "".join(
-            f"- {company}: {companies_count[company]}\n"
-            for company in companies_count
-        )
+        for company in companies_tuples:
+            complete_report += f"- {company[0]}: {company[1]}\n"
 
-        return (
-            f"{initial_report}\n"
-            "Produtos estocados por empresa: \n"
-            f"{count}"
-        )
+        return complete_report
